@@ -1,7 +1,7 @@
 <template>
   <div class="login-wrapper">
     <div class="login-card">
-      <h2 class="login-title">管理员登录</h2>
+      <h2 class="login-title">登录</h2>
       <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" status-icon>
         <el-form-item prop="userName">
           <el-input v-model="dataForm.userName" placeholder="帐号"></el-input>

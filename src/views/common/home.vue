@@ -29,7 +29,7 @@ export default {}
   align-items: center;
   /* 整体背景渐变 + 下方图片叠加 */
   background:
-    linear-gradient(135deg, #409eff 0%, #73a4ff 100%),
+    linear-gradient(135deg, #40d2ff 0%, #73c5ff 100%),
     url('./static/img/bg.png') no-repeat bottom center;
   background-size: cover; /* 背景图铺满 */
   padding: 20px;
@@ -68,7 +68,7 @@ export default {}
   font-weight: 700;
   font-size: 40px;
   margin-bottom: 24px;
-  color: #409eff;
+  color: #70d8ea;
 }
 
 .desc {
