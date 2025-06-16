@@ -3,7 +3,7 @@
     <div class="site-navbar__header">
       <h1 class="site-navbar__brand" @click="$router.push({ name: 'home' })">
         <a class="site-navbar__brand-lg" href="javascript:;">AOM管理平台</a>
-        <a class="site-navbar__brand-mini" href="javascript:;">SMS</a>
+        <a class="site-navbar__brand-mini" href="javascript:;">AOM</a>
       </h1>
     </div>
     <div class="site-navbar__body clearfix">

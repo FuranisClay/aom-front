@@ -22,9 +22,14 @@
     <el-form-item label="作者姓名" prop="authorName">
       <el-input v-model="dataForm.authorName" placeholder="作者姓名"></el-input>
     </el-form-item>
-    <el-form-item label="状态：草稿/待审核/已通过/已拒绝" prop="status">
-      <el-input v-model="dataForm.status" placeholder="状态：草稿/待审核/已通过/已拒绝"></el-input>
-    </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-radio-group v-model="dataForm.status">
+          <el-radio label="draft">草稿</el-radio>
+          <el-radio label="pending">待审核</el-radio>
+          <el-radio label="approved">已通过</el-radio>
+          <el-radio label="rejected">已拒绝</el-radio>
+        </el-radio-group>
+      </el-form-item>
     <el-form-item label="浏览次数" prop="viewCount">
       <el-input v-model="dataForm.viewCount" placeholder="浏览次数"></el-input>
     </el-form-item>
@@ -114,19 +119,27 @@
               params: this.$http.adornParams()
             }).then(({data}) => {
               if (data && data.code === 0) {
-                this.dataForm.title = data.news.title
-                this.dataForm.summary = data.news.summary
-                this.dataForm.content = data.news.content
-                this.dataForm.imageUrl = data.news.imageUrl
-                this.dataForm.authorId = data.news.authorId
-                this.dataForm.authorName = data.news.authorName
-                this.dataForm.status = data.news.status
-                this.dataForm.viewCount = data.news.viewCount
-                this.dataForm.publishedAt = data.news.publishedAt
-                this.dataForm.createdAt = data.news.createdAt
-                this.dataForm.updatedAt = data.news.updatedAt
+                const news = data.news
+                this.dataForm.title = news.title
+                this.dataForm.summary = news.summary
+                this.dataForm.content = news.content
+                this.dataForm.imageUrl = news.imageUrl
+                this.dataForm.authorId = news.authorId
+                this.dataForm.authorName = news.authorName
+                this.dataForm.status = news.status
+                this.dataForm.viewCount = news.viewCount
+                this.dataForm.publishedAt = news.publishedAt
+                this.dataForm.createdAt = news.createdAt
+                this.dataForm.updatedAt = news.updatedAt
               }
             })
+          } else {
+            // 新增时设置默认值
+            const now = new Date().toISOString()
+            this.dataForm.viewCount = '100'
+            this.dataForm.publishedAt = now
+            this.dataForm.createdAt = now
+            this.dataForm.updatedAt = now
           }
         })
       },
@@ -134,23 +147,22 @@
       dataFormSubmit () {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
+            const now = new Date().toISOString()
+            if (!this.dataForm.id) {
+              // 新增时设置默认 viewCount 和时间
+              this.dataForm.viewCount = '100'
+              this.dataForm.publishedAt = now
+              this.dataForm.createdAt = now
+              this.dataForm.updatedAt = now
+            } else {
+              // 编辑时更新 updatedAt
+              this.dataForm.updatedAt = now
+            }
+
             this.$http({
               url: this.$http.adornUrl(`/aommessage/news/${!this.dataForm.id ? 'save' : 'update'}`),
               method: 'post',
-              data: this.$http.adornData({
-                'id': this.dataForm.id || undefined,
-                'title': this.dataForm.title,
-                'summary': this.dataForm.summary,
-                'content': this.dataForm.content,
-                'imageUrl': this.dataForm.imageUrl,
-                'authorId': this.dataForm.authorId,
-                'authorName': this.dataForm.authorName,
-                'status': this.dataForm.status,
-                'viewCount': this.dataForm.viewCount,
-                'publishedAt': this.dataForm.publishedAt,
-                'createdAt': this.dataForm.createdAt,
-                'updatedAt': this.dataForm.updatedAt
-              })
+              data: this.$http.adornData(this.dataForm)
             }).then(({data}) => {
               if (data && data.code === 0) {
                 this.$message({
