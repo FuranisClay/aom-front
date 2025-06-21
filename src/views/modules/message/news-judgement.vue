@@ -27,26 +27,95 @@
     </el-pagination>
 
     <!-- 详情弹窗 -->
-    <el-dialog :visible.sync="detailDialogVisible" title="新闻详情">
-      <el-form :model="currentItem" label-width="80px">
-        <el-form-item label="标题">
-          <span>{{ currentItem.title }}</span>
-        </el-form-item>
-        <el-form-item label="简介">
-          <span>{{ currentItem.summary }}</span>
-        </el-form-item>
-        <el-form-item label="内容">
-          <span>{{ currentItem.content }}</span>
-        </el-form-item>
-        <el-form-item label="作者">
-          <span>{{ currentItem.authorName }}</span>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-radio-group v-model="currentItem.status">
-            <el-radio label="approved">已通过</el-radio>
-            <el-radio label="rejected">已拒绝</el-radio>
-          </el-radio-group>
-        </el-form-item>
+    <el-dialog :visible.sync="detailDialogVisible" title="新闻详情" width="80%">
+      <el-form label-width="120px">
+        <!-- 标题 + 作者ID -->
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="标题">
+              <span class="form-detail">{{ currentItem.title }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="作者ID">
+              <span class="form-detail">{{ currentItem.authorId }}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 作者姓名 + 浏览次数 -->
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="作者姓名">
+              <span class="form-detail">{{ currentItem.authorName }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="浏览次数">
+              <span class="form-detail">{{ currentItem.viewCount }}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 发布时间 + 创建时间 -->
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="发布时间">
+              <span class="form-detail">{{ currentItem.publishedAt }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="创建时间">
+              <span class="form-detail">{{ currentItem.createdAt }}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 更新时间 + 状态 -->
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="更新时间">
+              <span class="form-detail">{{ currentItem.updatedAt }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <el-radio-group v-model="currentItem.status">
+                <el-radio label="approved">已通过</el-radio>
+                <el-radio label="rejected">已拒绝</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 简介 -->
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="简介">
+              <span class="form-detail">{{ currentItem.summary }}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 内容 -->
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="内容">
+              <pre class="form-content">{{ currentItem.content }}</pre>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 图片 -->
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="图片">
+              <div class="image-preview">
+                <img :src="currentItem.imageUrl" alt="新闻图片" />
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
@@ -54,6 +123,7 @@
         <el-button type="primary" @click="auditNews">提交审核</el-button>
       </div>
     </el-dialog>
+
   </div>
 </template>
 
@@ -185,5 +255,34 @@ export default {
 }
 .dialog-footer {
   text-align: right;
+}
+
+.form-detail {
+  display: block;
+  font-size: 14px;
+  color: #333;
+}
+
+.form-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: sans-serif;
+  line-height: 1.5;
+}
+
+.image-preview {
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
 }
 </style>
