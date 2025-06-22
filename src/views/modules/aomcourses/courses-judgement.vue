@@ -27,28 +27,49 @@
     <!-- 详情弹窗 -->
     <el-dialog :visible.sync="detailDialogVisible" title="课程详情">
       <el-form :model="currentItem" label-width="80px">
+
         <el-form-item label="课程名称">
           <span>{{ currentItem.courseName }}</span>
         </el-form-item>
+
         <el-form-item label="课程简介">
           <span>{{ currentItem.courseDescription }}</span>
         </el-form-item>
-        <el-form-item label="封面地址">
-          <span>{{ currentItem.courseCover }}</span>
+
+        <!-- 图片展示 -->
+        <el-form-item label="封面">
+          <div class="image-preview-container">
+            <img :src="currentItem.courseCover" alt="封面" @click="previewImage(currentItem.courseCover)" style="max-width: 300px; cursor: pointer;">
+          </div>
         </el-form-item>
-        <el-form-item label="视频地址">
-          <span>{{ currentItem.courseVideo }}</span>
+
+        <!-- 视频展示 -->
+        <el-form-item label="视频">
+          <div class="video-container">
+            <video
+              v-if="currentItem.courseVideo"
+              class="video-js vjs-default-skin"
+              controls
+              :src="currentItem.courseVideo"
+              data-setup='{}'
+            ></video>
+            <span v-else>无视频</span>
+          </div>
         </el-form-item>
+
         <el-form-item label="作者">
           <span>{{ currentItem.author }}</span>
         </el-form-item>
+
         <el-form-item label="状态">
           <el-radio-group v-model="currentItem.status">
             <el-radio :label="1">通过审核</el-radio>
             <el-radio :label="0">拒绝审核</el-radio>
           </el-radio-group>
         </el-form-item>
+
       </el-form>
+
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="detailDialogVisible = false">取消</el-button>

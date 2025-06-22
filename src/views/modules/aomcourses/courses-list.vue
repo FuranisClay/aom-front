@@ -1,31 +1,51 @@
 <template>
   <div class="mod-config">
-    <!-- 新闻条目列表 -->
+    <!-- 搜索条件 -->
+    <el-card shadow="never" style="margin-bottom: 20px;">
+      <el-form :inline="true" label-width="80px">
+        <el-form-item label="课程名称">
+          <el-input v-model="searchParams.courseName" placeholder="支持模糊搜索"></el-input>
+        </el-form-item>
+
+        <el-form-item label="作者">
+          <el-input v-model="searchParams.author" placeholder="输入作者名搜索"></el-input>
+        </el-form-item>
+
+        <el-form-item label="排序">
+          <el-select v-model="searchParams.sortOrder" placeholder="排序方式">
+            <el-option label="默认排序" value=""></el-option>
+            <el-option label="升序" value="asc"></el-option>
+            <el-option label="降序" value="desc"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="getDataList">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <!-- 课程条目列表 -->
     <el-card v-for="item in dataList" :key="item.id" class="news-card" shadow="hover">
       <div class="card-content">
         <!-- 左侧图片 -->
         <div class="image">
-          <img :src="item.imageUrl" alt="新闻图片" />
+          <img :src="item.courseCover" alt="课程封面" @click="previewImage(item.courseCover)" />
         </div>
 
         <!-- 中间文字内容 -->
         <div class="info">
-          <div class="title">{{ item.title }}</div>
+          <div class="title" @click="viewDetail(item)" style="cursor: pointer; color: #409EFF;">{{ item.courseName }}</div>
           <div class="meta">
-            <span>作者：{{ item.authorName }}</span> |
-            <span>浏览次数：{{ item.viewCount }}</span> |
-            <span>发布时间：{{ item.publishedAt | formatDate }}</span>
+            <span>作者：{{ item.author }}</span> |
+            <span>状态：<el-tag :type="statusType(item.status)">{{ statusLabel(item.status) }}</el-tag></span>
           </div>
-          <div class="summary">{{ item.summary }}</div>
+          <div class="summary">{{ item.courseDescription }}</div>
         </div>
 
-        <!-- 右侧状态与操作 -->
+        <!-- 右侧操作 -->
         <div class="actions">
-          <div class="status">
-            <el-tag :type="statusType(item.status)" size="small">
-              {{ statusLabel(item.status) }}
-            </el-tag>
-          </div>
           <el-button type="text" @click="viewDetail(item)">查看详情</el-button>
         </div>
       </div>
@@ -42,62 +62,40 @@
       layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
 
-    <!-- 详情弹窗（已优化） -->
-    <el-dialog :visible.sync="detailDialogVisible" title="新闻详情" width="80%">
-      <!-- 此处使用之前优化过的详情模板 -->
+    <!-- 详情弹窗 -->
+    <el-dialog :visible.sync="detailDialogVisible" title="课程详情" width="80%">
       <el-form label-width="120px">
-        <!-- 标题 + 作者ID -->
+        <!-- 基本信息 -->
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="标题">
-              <span class="form-detail">{{ currentItem.title }}</span>
+            <el-form-item label="课程名称">
+              <span class="form-detail">{{ currentItem.courseName }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="作者ID">
-              <span class="form-detail">{{ currentItem.authorId }}</span>
+            <el-form-item label="作者">
+              <span class="form-detail">{{ currentItem.author }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
-        <!-- 作者姓名 + 浏览次数 -->
         <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="作者姓名">
-              <span class="form-detail">{{ currentItem.authorName }}</span>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="浏览次数">
-              <span class="form-detail">{{ currentItem.viewCount }}</span>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <!-- 发布时间 + 创建时间 -->
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="发布时间">
-              <span class="form-detail">{{ currentItem.publishedAt }}</span>
-            </el-form-item>
-          </el-col>
           <el-col :span="12">
             <el-form-item label="创建时间">
-              <span class="form-detail">{{ currentItem.createdAt }}</span>
+              <span class="form-detail">{{ formatTime(currentItem.createdAt) }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="更新时间">
+              <span class="form-detail">{{ formatTime(currentItem.updatedAt) }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
-        <!-- 更新时间 + 状态 -->
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="更新时间">
-              <span class="form-detail">{{ currentItem.updatedAt }}</span>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
             <el-form-item label="状态">
-              <el-tag :type="statusType(currentItem.status)" style="font-size: 14px;">
+              <el-tag :type="statusType(currentItem.status)">
                 {{ statusLabel(currentItem.status) }}
               </el-tag>
             </el-form-item>
@@ -107,40 +105,47 @@
         <!-- 简介 -->
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="简介">
-              <span class="form-detail">{{ currentItem.summary }}</span>
+            <el-form-item label="课程简介">
+              <span class="form-detail">{{ currentItem.courseDescription }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
-        <!-- 内容 -->
+        <!-- 视频播放 -->
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="内容">
-              <pre class="form-content">{{ currentItem.content }}</pre>
+            <el-form-item label="课程视频">
+              <div class="video-container">
+                <video
+                  v-if="currentItem.courseVideo"
+                  class="video-js vjs-default-skin"
+                  controls
+                  :src="currentItem.courseVideo"
+                  data-setup='{}'
+                ></video>
+                <span v-else>无视频</span>
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
 
-        <!-- 图片 -->
+        <!-- 封面图预览 -->
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item label="图片">
+            <el-form-item label="课程封面">
               <div class="image-preview">
-                <img :src="currentItem.imageUrl" alt="新闻图片" />
+                <img :src="currentItem.courseCover" alt="课程封面" @click="previewImage(currentItem.courseCover)" />
               </div>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
-
       <div slot="footer" class="dialog-footer">
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
-
 
 <script>
 export default {
@@ -155,61 +160,28 @@ export default {
       detailDialogVisible: false,
       currentItem: {},
 
-      isAdmin: false // 是否为管理员
+      searchParams: {
+        courseName: '',
+        author: '',
+        sortOrder: ''
+      }
     }
-  },
-  computed: {
-    authorId () {
-      return this.$store.state.user.id
-    }
-  },
-  mounted () {
-    this.checkAdminStatus()
   },
   methods: {
-    async checkAdminStatus () {
-      try {
-        const res = await this.$http({
-          url: this.$http.adornUrl('/sys/user/isAdmin'),
-          method: 'get',
-          params: {
-            id: this.authorId
-          }
-        })
-        if (res.data && res.data.code === 0) {
-          this.isAdmin = res.data.isAdmin
-          this.getDataList()
-        } else {
-          this.$message.error('权限检查失败')
-        }
-      } catch (err) {
-        console.error(err)
-        this.$message.error('无法连接服务器')
-      }
-    },
-
     getDataList () {
       this.dataListLoading = true
 
-      let url, params
-
-      if (this.isAdmin) {
-        url = '/aommessage/news/list'
-        params = {
-          page: this.pageIndex,
-          limit: this.pageSize
-        }
-      } else {
-        url = '/aommessage/news/listbyuserid'
-        params = {
-          userId: this.authorId,
-          page: this.pageIndex,
-          limit: this.pageSize
-        }
+      const params = {
+        page: this.pageIndex,
+        limit: this.pageSize,
+        key: this.searchParams.courseName || '', // 用于模糊搜索
+        author: this.searchParams.author || '',
+        sort: this.searchParams.sortOrder,
+        status: 1 // 👈 新增筛选条件：只查询已启用的课程
       }
 
       this.$http({
-        url: this.$http.adornUrl(url),
+        url: this.$http.adornUrl('/aomcourses/courses/list'),
         method: 'get',
         params: this.$http.adornParams(params)
       }).then(({ data }) => {
@@ -233,6 +205,15 @@ export default {
       this.detailDialogVisible = true
     },
 
+    resetSearch () {
+      this.searchParams = {
+        courseName: '',
+        author: '',
+        sortOrder: ''
+      }
+      this.getDataList()
+    },
+
     sizeChangeHandle (val) {
       this.pageSize = val
       this.pageIndex = 1
@@ -243,48 +224,48 @@ export default {
       this.getDataList()
     },
 
+    // 状态标签类型
     statusType (status) {
       switch (status) {
-        case 'pending':
-          return 'warning'
-        case 'approved':
+        case 1:
           return 'success'
-        case 'rejected':
+        case 0:
           return 'danger'
         default:
           return 'info'
       }
     },
+    // 状态文字
     statusLabel (status) {
       switch (status) {
-        case 'pending':
-          return '待审核'
-        case 'approved':
-          return '已通过'
-        case 'rejected':
-          return '已拒绝'
+        case 1:
+          return '已启用'
+        case 0:
+          return '已禁用'
         default:
           return '未知状态'
       }
+    },
+    // 格式化时间
+    formatTime (time) {
+      return time ? new Date(time).toLocaleString() : '--'
+    },
+    // 图片预览
+    previewImage (url) {
+      window.open(url, '_blank')
     }
+  },
+  mounted () {
+    this.getDataList()
   }
 }
 </script>
+
 <style scoped>
 .form-detail {
   display: block;
   font-size: 14px;
   color: #333;
-}
-
-.form-content {
-  white-space: pre-wrap;
-  word-break: break-word;
-  background-color: #f9f9f9;
-  padding: 10px;
-  border-radius: 4px;
-  font-family: sans-serif;
-  line-height: 1.5;
 }
 
 .image-preview {
@@ -298,7 +279,18 @@ export default {
   height: auto;
   display: block;
   object-fit: cover;
+  cursor: zoom-in;
 }
+
+.video-container {
+  max-width: 600px;
+}
+
+.video-js {
+  width: 100%;
+  height: auto;
+}
+
 .news-card {
   margin-bottom: 16px;
   padding: 0;
@@ -322,6 +314,7 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  cursor: zoom-in;
 }
 
 .info {
@@ -335,6 +328,7 @@ export default {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 6px;
+  cursor: pointer;
 }
 
 .info .meta {
@@ -355,9 +349,4 @@ export default {
   align-items: flex-end;
   justify-content: center;
 }
-
-.actions .status {
-  margin-bottom: 8px;
-}
-
 </style>

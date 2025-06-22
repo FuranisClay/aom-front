@@ -23,7 +23,13 @@
         </el-form-item>
 
         <el-form-item label="课程作者" prop="author">
-          <el-input v-model="courseForm.author" :value="authorName" placeholder="请输入课程作者"></el-input>
+          <el-input v-model="courseForm.author" placeholder="请输入课程作者"></el-input>
+        </el-form-item>
+
+        <!-- 新增：课程排序 -->
+        <el-form-item label="课程排序" prop="courseSort">
+          <el-input-number v-model.number="courseForm.courseSort" :min="1" :max="999" controls-position="right"
+                           placeholder="数字越小排序越靠前"></el-input-number>
         </el-form-item>
 
         <el-form-item>
@@ -40,19 +46,21 @@ export default {
   data () {
     return {
       courseForm: {
-        id: null,
+        id: 0,
         courseName: '',
         courseDescription: '',
         courseCover: '',
         courseVideo: '',
-        author: this.authorName
+        author: '',
+        courseSort: 1 // 新增字段，默认排序为1
       },
       courseRules: {
         courseName: [{ required: true, message: '课程名称不能为空', trigger: 'blur' }],
         courseDescription: [{ required: true, message: '课程简介不能为空', trigger: 'blur' }],
         courseCover: [{ required: true, message: '课程封面路径不能为空', trigger: 'blur' }],
         courseVideo: [{ required: true, message: '课程视频路径不能为空', trigger: 'blur' }],
-        author: [{ required: true, message: '课程作者不能为空', trigger: 'blur' }]
+        author: [{ required: true, message: '课程作者不能为空', trigger: 'blur' }],
+        courseSort: [{ required: true, message: '课程排序不能为空', trigger: 'blur' }]
       }
     }
   },
@@ -71,7 +79,6 @@ export default {
           const now = new Date().toISOString()
           const postData = {
             ...this.courseForm,
-            author: this.authorName,
             createdAt: now,
             updatedAt: now
           }
