@@ -10,6 +10,7 @@
         <el-button v-if="isAuth('mettings:meetings:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
+<!--    来自meeting的git测试-->
     <el-table
       :data="dataList"
       border
