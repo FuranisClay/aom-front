@@ -2,7 +2,7 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.key" placeholder="会议名称" clearable></el-input>
+        <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
@@ -26,25 +26,55 @@
         prop="id"
         header-align="center"
         align="center"
-        label="会议ID，主键">
+        label="">
       </el-table-column>
       <el-table-column
         prop="meetingName"
         header-align="center"
         align="center"
-        label="会议名称">
+        label="会议名称 (from news.title)">
       </el-table-column>
       <el-table-column
-        prop="meetingCover"
+        prop="meetingSummary"
         header-align="center"
         align="center"
-        label="会议封面图片URL">
+        label="会议简介 (from news.summary)">
       </el-table-column>
       <el-table-column
         prop="meetingContent"
         header-align="center"
         align="center"
-        label="会议内容">
+        label="会议内容/议程 (from news.content)">
+      </el-table-column>
+      <el-table-column
+        prop="coverUrl"
+        header-align="center"
+        align="center"
+        label="会议封面图片路径 (from news.image_url)">
+      </el-table-column>
+      <el-table-column
+        prop="creatorId"
+        header-align="center"
+        align="center"
+        label="创建者ID (from news.author_id)">
+      </el-table-column>
+      <el-table-column
+        prop="creatorName"
+        header-align="center"
+        align="center"
+        label="创建者姓名 (from news.author_name)">
+      </el-table-column>
+      <el-table-column
+        prop="status"
+        header-align="center"
+        align="center"
+        label="会议状态：草稿/待审核/已批准/已拒绝 (from news.status)">
+      </el-table-column>
+      <el-table-column
+        prop="participantCount"
+        header-align="center"
+        align="center"
+        label="参与人数 (from news.view_count)">
       </el-table-column>
       <el-table-column
         prop="startTime"
@@ -57,48 +87,6 @@
         header-align="center"
         align="center"
         label="会议结束时间">
-      </el-table-column>
-      <el-table-column
-        prop="creator"
-        header-align="center"
-        align="center"
-        label="创建人">
-      </el-table-column>
-      <el-table-column
-        prop="creatorType"
-        header-align="center"
-        align="center"
-        label="创建人类型：1-管理员，2-企业用户">
-      </el-table-column>
-      <el-table-column
-        prop="auditStatus"
-        header-align="center"
-        align="center"
-        label="审核状态：0-待审核，1-审核通过，2-审核不通过">
-      </el-table-column>
-      <el-table-column
-        prop="auditor"
-        header-align="center"
-        align="center"
-        label="审核人">
-      </el-table-column>
-      <el-table-column
-        prop="auditTime"
-        header-align="center"
-        align="center"
-        label="审核时间">
-      </el-table-column>
-      <el-table-column
-        prop="auditReason"
-        header-align="center"
-        align="center"
-        label="审核意见">
-      </el-table-column>
-      <el-table-column
-        prop="status"
-        header-align="center"
-        align="center"
-        label="会议状态：0-已删除，1-正常">
       </el-table-column>
       <el-table-column
         prop="createdAt"
