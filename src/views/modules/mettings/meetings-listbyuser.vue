@@ -55,14 +55,25 @@
         <p><strong>创建时间:</strong> {{ currentItem.createdAt | formatFullDate }}</p>
         <p><strong>更新时间:</strong> {{ currentItem.updatedAt | formatFullDate }}</p>
         <el-divider></el-divider>
+
+        <!-- 图片显示区域 -->
+        <div v-if="currentItem.coverUrl">
+          <p><strong>会议图片:</strong></p>
+          <div class="image-preview">
+            <img :src="currentItem.coverUrl" alt="会议图片"
+                 @click="openImageInNewTab(currentItem.coverUrl)" />
+          </div>
+        </div>
+        <el-divider></el-divider>
+
         <p><strong>简介:</strong> {{ currentItem.meetingSummary }}</p>
         <el-divider></el-divider>
         <strong>内容/议程:</strong>
         <div v-html="currentItem.meetingContent"></div>
       </div>
       <span slot="footer" class="dialog-footer">
-            <el-button @click="detailDialogVisible = false">关闭</el-button>
-        </span>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </span>
     </el-dialog>
 
     <!-- 新增/修改弹窗 -->
@@ -79,38 +90,33 @@ export default {
       dataForm: { key: '' },
       dataList: [],
       pageIndex: 1,
-      pageSize: 10, // Standard list view page size
+      pageSize: 10,
       totalPage: 0,
       dataListLoading: false,
       detailDialogVisible: false,
       addOrUpdateVisible: false,
       currentItem: {},
-      isAdmin: false // 是否为管理员
+      isAdmin: false
     }
   },
-  components: {
-    AddOrUpdate
-  },
+  components: { AddOrUpdate },
   computed: {
     userId () {
       return this.$store.state.user.id
     }
   },
-  activated () {
-    this.getDataList()
-  },
-  mounted () {
-    this.checkAdminStatus()
-  },
+  activated () { this.getDataList() },
+  mounted () { this.checkAdminStatus() },
   methods: {
+    openImageInNewTab (url) {
+      window.open(url, '_blank')
+    },
     async checkAdminStatus () {
       try {
         const res = await this.$http({
           url: this.$http.adornUrl('/sys/user/isAdmin'),
           method: 'get',
-          params: {
-            id: this.userId
-          }
+          params: { id: this.userId }
         })
         if (res.data && res.data.code === 0) {
           this.isAdmin = res.data.isAdmin
@@ -125,24 +131,14 @@ export default {
     },
     getDataList () {
       this.dataListLoading = true
-
       let url, params
-
       if (this.isAdmin) {
         url = '/mettings/meetings/list'
-        params = {
-          page: this.pageIndex,
-          limit: this.pageSize
-        }
+        params = { page: this.pageIndex, limit: this.pageSize }
       } else {
         url = '/mettings/meetings/listbyuserid'
-        params = {
-          userId: this.userId,
-          page: this.pageIndex,
-          limit: this.pageSize
-        }
+        params = { userId: this.userId, page: this.pageIndex, limit: this.pageSize }
       }
-
       this.$http({
         url: this.$http.adornUrl(url),
         method: 'get',
@@ -162,29 +158,29 @@ export default {
         this.dataListLoading = false
       })
     },
-    statusLabel(status) {
+    statusLabel (status) {
       switch (status) {
-        case 'draft': return { type: 'info', text: '草稿' };
-        case 'pending': return { type: 'warning', text: '待审核' };
-        case 'approved': return { type: 'success', text: '已批准' };
-        case 'rejected': return { type: 'danger', text: '已拒绝' };
-        default: return { type: '', text: status };
+        case 'draft': return { type: 'info', text: '草稿' }
+        case 'pending': return { type: 'warning', text: '待审核' }
+        case 'approved': return { type: 'success', text: '已批准' }
+        case 'rejected': return { type: 'danger', text: '已拒绝' }
+        default: return { type: '', text: status }
       }
     },
-    canEdit(item) {
-      const isOwner = item.creatorId === this.userId;
-      const isEditableStatus = item.status === 'draft' || item.status === 'rejected';
-      return (this.isAdmin || isOwner) && isEditableStatus;
+    canEdit (item) {
+      const isOwner = item.creatorId === this.userId
+      const isEditableStatus = item.status === 'draft' || item.status === 'rejected'
+      return (this.isAdmin || isOwner) && isEditableStatus
     },
-    showDetails(item) {
-      this.$http.get(this.$http.adornUrl(`/mettings/meetings/info/${item.id}`)).then(({data}) => {
+    showDetails (item) {
+      this.$http.get(this.$http.adornUrl(`/mettings/meetings/info/${item.id}`)).then(({ data }) => {
         if (data && data.code === 0) {
-          this.currentItem = data.meetings;
-          this.detailDialogVisible = true;
+          this.currentItem = data.meetings
+          this.detailDialogVisible = true
         } else {
-          this.$message.error(data.msg || '获取详情失败');
+          this.$message.error(data.msg || '获取详情失败')
         }
-      });
+      })
     },
     addOrUpdateHandle (id) {
       this.addOrUpdateVisible = true
@@ -192,7 +188,7 @@ export default {
         this.$refs.addOrUpdate.init(id)
       })
     },
-    deleteHandle(id) {
+    deleteHandle (id) {
       this.$confirm(`确定对该会议进行[删除]操作?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -202,9 +198,11 @@ export default {
           url: this.$http.adornUrl('/mettings/meetings/delete'),
           method: 'post',
           data: this.$http.adornData([id], false)
-        }).then(({data}) => {
+        }).then(({ data }) => {
           if (data && data.code === 0) {
-            this.$message({ message: '操作成功', type: 'success', duration: 1500, onClose: () => this.getDataList() })
+            this.$message({
+              message: '操作成功', type: 'success', duration: 1500, onClose: () => this.getDataList()
+            })
           } else {
             this.$message.error(data.msg)
           }
@@ -217,50 +215,40 @@ export default {
     }
   },
   filters: {
-    formatDate(value) {
-      if (!value) return '';
-      return new Date(value).toLocaleDateString('zh-CN');
+    formatDate (value) {
+      if (!value) return ''
+      return new Date(value).toLocaleDateString('zh-CN')
     },
-    formatFullDate(value) {
-      if (!value) return '';
-      return new Date(value).toLocaleString('zh-CN');
+    formatFullDate (value) {
+      if (!value) return ''
+      return new Date(value).toLocaleString('zh-CN')
     }
   }
 }
 </script>
 
 <style scoped>
-.list-item {
-  border-bottom: 1px solid #EBEEF5;
-  padding: 15px 0;
+.list-item { border-bottom: 1px solid #EBEEF5; padding: 15px 0; }
+.list-item:last-child { border-bottom: none; }
+.item-title { font-size: 18px; margin: 0 0 8px 0; }
+.item-meta { font-size: 13px; color: #999; margin-bottom: 8px; }
+.item-summary { font-size: 14px; color: #606266; line-height: 1.5; margin-bottom: 10px; }
+.item-footer { display: flex; justify-content: space-between; align-items: center; }
+.text-danger { color: #F56C6C; }
+.detail-dialog-content p { line-height: 1.8; }
+.image-slot { display: flex; align-items: center; justify-content: center; color: #999; height: 300px; background: #f5f5f5; }
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  transition: 0.3s;
 }
-.list-item:last-child {
-  border-bottom: none;
-}
-.item-title {
-  font-size: 18px;
-  margin: 0 0 8px 0;
-}
-.item-meta {
-  font-size: 13px;
-  color: #999;
-  margin-bottom: 8px;
-}
-.item-summary {
-  font-size: 14px;
-  color: #606266;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-.item-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.text-danger {
-  color: #F56C6C;
-}
-.detail-dialog-content p {
-  line-height: 1.8;
+
+.image-preview img:hover {
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 </style>

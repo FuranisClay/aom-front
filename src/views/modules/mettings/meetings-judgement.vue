@@ -8,6 +8,7 @@
         <el-button @click="getDataList()">查询</el-button>
       </el-form-item>
     </el-form>
+
     <el-table
       :data="dataList"
       border
@@ -40,7 +41,7 @@
         width="120"
         label="状态">
         <template slot-scope="scope">
-          <el-tag type="warning">{{ scope.row.status }}</el-tag>
+          <el-tag :type="statusType(scope.row.status)">{{ scope.row.status }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
@@ -54,6 +55,7 @@
         </template>
       </el-table-column>
     </el-table>
+
     <el-pagination
       @size-change="sizeChangeHandle"
       @current-change="currentChangeHandle"
@@ -72,27 +74,49 @@
       <div v-if="currentItem">
         <h3>{{ currentItem.meetingName }}</h3>
         <p>
-          <span>创建者: {{ currentItem.creatorName }}</span> |
-          <span>提交时间: {{ currentItem.createdAt | formatDate }}</span> |
-          <span>开始时间: {{ currentItem.startTime | formatDate }}</span> |
-          <span>结束时间: {{ currentItem.endTime | formatDate }}</span>
+          <span><strong>会议ID:</strong> {{ currentItem.id }}</span> |
+          <span><strong>创建者:</strong> {{ currentItem.creatorName }}</span> |
+          <span><strong>计划人数:</strong> {{ currentItem.participantCount }}</span>
         </p>
+        <p>
+          <span><strong>提交时间:</strong> {{ currentItem.createdAt | formatDate }}</span> |
+          <span><strong>开始时间:</strong> {{ currentItem.startTime | formatDate }}</span> |
+          <span><strong>结束时间:</strong> {{ currentItem.endTime | formatDate }}</span>
+        </p>
+        <p>
+          <strong>状态:</strong>
+          <el-tag :type="statusType(currentItem.status)">{{ currentItem.status }}</el-tag>
+        </p>
+
         <el-divider></el-divider>
-        <strong>会议简介:</strong>
+
+        <!-- 图片展示 -->
+        <div v-if="currentItem.coverUrl">
+          <p><strong>会议封面:</strong></p>
+          <div class="image-preview">
+            <img :src="currentItem.coverUrl" alt="会议图片"
+                 @click="openImageInNewTab(currentItem.coverUrl)" />
+          </div>
+          <el-divider></el-divider>
+        </div>
+
+        <p><strong>会议简介:</strong></p>
         <p>{{ currentItem.summary }}</p>
+
         <el-divider></el-divider>
-        <strong>会议内容:</strong>
+
+        <p><strong>会议内容:</strong></p>
         <div v-html="currentItem.meetingContent"></div>
       </div>
+
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="danger" @click="judgeMeeting('approved')">拒 绝</el-button>
-        <el-button type="success" @click="judgeMeeting('rejected')">通 过</el-button>
+        <el-button type="danger" @click="judgeMeeting('rejected')">拒 绝</el-button>
+        <el-button type="success" @click="judgeMeeting('approved')">通 过</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
-
 <script>
 export default {
   data () {
@@ -121,7 +145,7 @@ export default {
           'limit': this.pageSize,
           'key': this.dataForm.key
         })
-      }).then(({data}) => {
+      }).then(({ data }) => {
         if (data && data.code === 0) {
           this.dataList = data.page.list
           this.totalPage = data.page.totalCount
@@ -144,7 +168,7 @@ export default {
           id: this.currentItem.id,
           status: status
         })
-      }).then(({data}) => {
+      }).then(({ data }) => {
         if (data && data.code === 0) {
           this.$message({
             message: '审核操作成功',
@@ -160,21 +184,52 @@ export default {
         }
       });
     },
-    sizeChangeHandle (val) {
+    sizeChangeHandle(val) {
       this.pageSize = val
       this.pageIndex = 1
       this.getDataList()
     },
-    currentChangeHandle (val) {
+    currentChangeHandle(val) {
       this.pageIndex = val
       this.getDataList()
+    },
+    openImageInNewTab(url) {
+      window.open(url, '_blank')
+    },
+    statusType(status) {
+      switch (status) {
+        case 'draft': return 'info'
+        case 'pending': return 'warning'
+        case 'approved': return 'success'
+        case 'rejected': return 'danger'
+        default: return ''
+      }
     }
   },
   filters: {
     formatDate(value) {
-      if (!value) return '';
-      return new Date(value).toLocaleString();
+      if (!value) return ''
+      return new Date(value).toLocaleString()
     }
   }
 }
 </script>
+<style scoped>
+.image-preview img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+.image-preview img:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.el-dialog__body p {
+  margin: 8px 0;
+}
+</style>
