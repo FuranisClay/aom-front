@@ -4,6 +4,24 @@
       <el-form-item>
         <el-input v-model="dataForm.key" placeholder="会议名称" clearable></el-input>
       </el-form-item>
+      <el-form-item label="开始时间">
+        <el-date-picker
+          v-model="dataForm.startTime"
+          type="datetime"
+          placeholder="选择开始时间"
+          style="width: 180px">
+        </el-date-picker>
+      </el-form-item>
+
+      <el-form-item label="结束时间">
+        <el-date-picker
+          v-model="dataForm.endTime"
+          type="datetime"
+          placeholder="选择结束时间"
+          style="width: 180px">
+        </el-date-picker>
+      </el-form-item>
+
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button type="primary" @click="addOrUpdateHandle()">发布新会议</el-button>
@@ -96,7 +114,9 @@ export default {
       detailDialogVisible: false,
       addOrUpdateVisible: false,
       currentItem: {},
-      isAdmin: false
+      isAdmin: false,
+      startTime: null,
+      endTime: null
     }
   },
   components: { AddOrUpdate },
@@ -132,7 +152,16 @@ export default {
     getDataList () {
       this.dataListLoading = true
       let url, params
-      if (this.isAdmin) {
+      if (this.dataForm.startTime && this.dataForm.endTime) {
+        url = '/mettings/meetings/listbytime'
+        params = {
+          userId: this.userId,
+          startTime: new Date(this.dataForm.startTime).toISOString(),
+          endTime: new Date(this.dataForm.endTime).toISOString(),
+          page: this.pageIndex,
+          limit: this.pageSize
+        }
+      } else if (this.isAdmin) {
         url = '/mettings/meetings/list'
         params = { page: this.pageIndex, limit: this.pageSize }
       } else {
