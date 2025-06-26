@@ -52,12 +52,12 @@ export default {
         courseDescription: '',
         courseCover: '',
         courseVideo: '',
-        author: '', // 现在可以自由编辑
-        courseSort: 1, // 默认值
+        author: '',
+        courseSort: 1,
         status: -1, // 待审核状态
         createdAt: null,
         updatedAt: null,
-        userId: null // 记录发布该课程的用户ID（不可编辑）
+        userId: null // 记录发布该课程的用户ID
       },
       courseRules: {
         courseName: [{ required: true, message: '课程名称不能为空', trigger: 'blur' }],
@@ -75,7 +75,7 @@ export default {
     }
   },
   created () {
-    // 初始化 userId 为当前用户，但 author 可由用户自行填写
+    // 初始化 userId 为当前用户
     this.courseForm.userId = this.authorId
   },
   methods: {
