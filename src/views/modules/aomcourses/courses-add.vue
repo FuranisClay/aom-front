@@ -22,8 +22,9 @@
           <el-input v-model="courseForm.courseVideo" placeholder="请输入课程视频URL"></el-input>
         </el-form-item>
 
+        <!-- 修改：允许自由编辑作者 -->
         <el-form-item label="课程作者" prop="author">
-          <el-input v-model="courseForm.author" placeholder="请输入课程作者"></el-input>
+          <el-input v-model="courseForm.author" placeholder="请输入课程作者名称"></el-input>
         </el-form-item>
 
         <!-- 新增：课程排序 -->
@@ -51,8 +52,12 @@ export default {
         courseDescription: '',
         courseCover: '',
         courseVideo: '',
-        author: '',
-        courseSort: 1 // 新增字段，默认排序为1
+        author: '', // 现在可以自由编辑
+        courseSort: 1, // 默认值
+        status: -1, // 待审核状态
+        createdAt: null,
+        updatedAt: null,
+        userId: null // 记录发布该课程的用户ID（不可编辑）
       },
       courseRules: {
         courseName: [{ required: true, message: '课程名称不能为空', trigger: 'blur' }],
@@ -67,10 +72,11 @@ export default {
   computed: {
     authorId () {
       return this.$store.state.user.id
-    },
-    authorName () {
-      return this.$store.state.user.name
     }
+  },
+  created () {
+    // 初始化 userId 为当前用户，但 author 可由用户自行填写
+    this.courseForm.userId = this.authorId
   },
   methods: {
     submitCourse () {
@@ -79,9 +85,11 @@ export default {
           const now = new Date().toISOString()
           const postData = {
             ...this.courseForm,
+            status: -1, // 提交后默认为待审核状态
             createdAt: now,
             updatedAt: now
           }
+
           this.$http({
             url: this.$http.adornUrl('/aomcourses/courses/save'),
             method: 'post',
@@ -90,15 +98,31 @@ export default {
             if (data && data.code === 0) {
               this.$message.success('新增课程成功')
               this.resetCourse()
+              this.$root.$emit('course-submitted') // 发布完成后广播事件
             } else {
               this.$message.error(data.msg || '新增失败')
             }
+          }).catch(() => {
+            this.$message.error('网络异常，请稍后再试')
           })
         }
       })
     },
     resetCourse () {
       this.$refs['courseForm'].resetFields()
+      this.courseForm = {
+        id: 0,
+        courseName: '',
+        courseDescription: '',
+        courseCover: '',
+        courseVideo: '',
+        author: '', // 清空，不绑定当前用户
+        courseSort: 1,
+        status: -1,
+        createdAt: null,
+        updatedAt: null,
+        userId: this.authorId // 保留 userId 为当前登录用户
+      }
     }
   }
 }
@@ -109,3 +133,4 @@ export default {
   padding: 20px;
 }
 </style>
+
