@@ -144,7 +144,7 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       dataList: [],
       pageIndex: 1,

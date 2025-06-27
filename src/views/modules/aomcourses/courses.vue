@@ -11,6 +11,7 @@
       </el-form-item>
     </el-form>
     <el-table
+
       :data="dataList"
       border
       v-loading="dataListLoading"
