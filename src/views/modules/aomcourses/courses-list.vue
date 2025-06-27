@@ -285,6 +285,7 @@ export default {
           page: this.pageIndex,
           limit: this.pageSize,
           key: this.searchParams.courseName || '',
+          author: this.searchParams.author || '',
           sort: this.searchParams.sortOrder,
           userId: this.currentUserId
         }
